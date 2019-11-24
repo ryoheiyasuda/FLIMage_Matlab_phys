@@ -1,0 +1,17 @@
+function [filepath, basename, filenumber, max] = spc_AnalyzeFilename(filename_original)
+
+[filepath, filename, ext, versn] = fileparts(filename_original);
+
+if ~isempty(filepath)
+    
+end
+
+if strcmpi(filename(end-3:end), '_max')
+    max = 1;
+    filenumber = str2num(filename(end-6:end-4));
+    basename = filename(1:end-7);
+else 
+    max = 0;
+    filenumber = str2num(filename(end-2:end));
+    basename = filename(1:end-3);
+end

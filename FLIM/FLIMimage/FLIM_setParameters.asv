@@ -1,0 +1,11 @@
+function FLIM_setParameters;
+
+global state;
+
+
+out1=calllib('spcm32','SPC_set_parameters',state.spc.acq.module,state.spc.acq.SPCdata);
+
+if (out1~=0)
+    error = FLIM_get_error_string (out1);    
+    disp(['error during setting paramet:', error]);
+end

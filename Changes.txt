@@ -1,0 +1,103 @@
+scanimage (Line 101)
+if nargin == 0
+    defFile = 'standard_usr.usr';
+    iniFileName = 'standard_model.ini';
+elseif nargin == 1
+    iniFileName = 'standard_model.ini';
+end
+
+
+setupDAQDevices_Common (Line 195)
+Add setTimebaseSource(state.init.hAI);
+state.init.primaryDeviceID = state.init.mirrorOutputBoardID;
+
+
+
+makeFrameByStripes (line92)
+state.motor.motorOn && state.motor.zStepSize && state.acq.numberOfZSlices > 1 && state.internal.zSliceCounter < (state.acq.numberOfZSlices - 1) %VI080911A
+
+
+
+ensureEomGuiStates.m (Line 40) Comment out:
+%assert(ismember(displayedBeam,beams));  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+For Frame scanning
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+exportClocks
+exportClocks(nFrames, RY_flag)
+Line46 and many Search for RY_flag.
+
+
+
+StartGrab
+    try
+        RY_framing = (~state.spc.acq.spc_average && state.spc.acq.spc_takeFLIM); %%RY ADDED
+    catch
+        RY_framing = 0;
+    end
+    if ~RY_framing
+        state.init.eom.hAO.writeAnalogData(makePockelsCellDataOutput(state.init.eom.grabLaserList)); 
+    else
+        [spc_finalDataOutput, shutterOut] = spc_makeDataOutput();
+        state.spc.init.eom.hAO2.writeAnalogData([spc_finalDataOutput, shutterOut]);
+        pause(0.1);
+    end
+
+
+executeGrabOneCallBack
+Add spc_makeMirrorDataOutput
+
+
+StopGrab
+Add: state.spc.init.taskA.control('DAQmx_Val_Task_Unreserve');
+
+
+yphys_yphys_linTransformMirrorData is called by
+yphys_scanVoltage.
+
+makeStripe
+set parmeter for RY_imaging
+
+calibrateEom
+        if min_p < max_p
+            photodiode_voltage([1:min_p, max_p:end]) = -2;
+        else
+            photodiode_voltage([1:max_p, min_p:end]) = -2;
+        end
+
+
+standard_model
+	state.shutter.open = 0
+	state.motor.resolutionX = 0.04
+	state.motor.resolutionY = 0.04
+	state.motor.resolutionZ = 0.005
+
+
+
+endAcquisition
+    %%%%%%%%%%%%%%%%Ryohei%%%%%%%%%%%%%%%%%%%%%
+    page = 0;
+    try
+        page = state.internal.usePage;
+    catch ME
+    end
+    %%%%%%%%%%%%%%%%Ryohei%%%%%%%%%%%%%%%%%%%%%
+    
+    %if MP285FinishMove(0)	% check that movement completed (e.g. a CR was sent back), but don't verify position. This proved too unreliable so far -- Vijay Iyer 10/06/08
+    if ~page
+
+
+
+function startLoopRepeat
+    try
+        RY_framing = (~state.spc.acq.spc_average); % && state.spc.acq.spc_takeFLIM); %%RY ADDED
+    catch
+        RY_framing = 0;
+    end
+    if RY_framing
+        spc_makeMirrorOutput();
+        state.internal.updatedZoomOrRot = 1;
+    end
+notify(state.hSI,'acquisitionStarting','GRAB');

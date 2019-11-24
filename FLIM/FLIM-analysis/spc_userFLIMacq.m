@@ -1,0 +1,77 @@
+function spc_userFLIMacq
+global state;
+global gh;
+
+if state.spc.init.spc_on == 0
+    return;
+end
+
+
+str = get(gh.spc.FLIMimage.grab, 'String');
+strL = get(gh.spc.FLIMimage.loop, 'String');
+
+looping = strcmp(strL, 'STOP');
+if looping
+    str = strL;
+end
+
+if strcmp(str, 'STOP')
+
+    spc_stopGrab;
+    spc_parkLaser;
+    %stopGrab;
+    closeShutter;
+    %parklaser;
+
+	
+	if state.spc.acq.spc_dll
+        FLIM_StopMeasurement;
+
+        if state.internal.zSliceCounter + 1 == state.acq.numberOfZSlices
+            if state.spc.acq.spc_takeFLIM
+                state.files.fileCounter = state.files.fileCounter - 1;
+                updateFullFileName(0);
+                FLIM_imageAcq;
+	            spc_writeData;
+                if state.acq.numberOfZSlices > 1
+                    spc_maxProc;
+                end
+                spc_saveAsTiff(state.spc.files.maxfullFileName, 0);
+                state.files.fileCounter = state.files.fileCounter + 1;
+                updateFullFileName(0);  
+            end
+            set(gh.spc.FLIMimage.grab, 'String', 'GRAB');
+            if ~looping
+                try
+                    stop(state.spc.acq.mt);
+                    delete(state.spc.acq.mt);
+                catch
+                end
+                set(gh.spc.FLIMimage.focus, 'Visible', 'on');
+                set(gh.spc.FLIMimage.grab, 'Visible', 'on');
+            else
+                set(gh.spc.FLIMimage.focus, 'Visible', 'off');
+                set(gh.spc.FLIMimage.grab, 'Visible', 'off');
+            end
+            %flushAOData;
+            if state.spc.acq.spc_takeFLIM
+                state.files.fileCounter = state.files.fileCounter - 1;
+                try
+                    spc_auto(1);
+                end
+                state.files.fileCounter = state.files.fileCounter+1;
+            end
+        else
+            if state.spc.acq.spc_takeFLIM
+		        FLIM_imageAcq;
+		        spc_writeData;
+                spc_maxProc;
+				spc_setupPixelClockDAQ_specific;
+				FLIM_FillMemory;
+				FLIM_StartMeasurement;
+            end
+            spc_putData;
+            spc_startGrab;
+        end
+	end
+end

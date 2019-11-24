@@ -1,0 +1,36 @@
+function rgbimage = im2_ratio;
+
+[fname,pname] = uigetfile('*.tif','Select tif-file');
+image1 = double(imread([pname, fname], 1));
+image2 = double(imread([pname, fname], 2));
+
+[fname,pname] = uigetfile('*.tif','Select Background file');
+back1 = double(imread([pname, fname], 1));
+back2 = double(imread([pname, fname], 2));
+
+b1 = mean(mean(back1, 1), 2);
+b2 = mean(mean(back2, 1), 2);
+
+image1 = image1 - b1;
+image2 = image2 - b2;
+
+immax = max(max(image1, [], 1), [], 2);
+bw = (image1 > immax/10);
+sz = size(image1);
+ratio = zeros(sz(1), sz(2));
+ratio(bw) = image1(bw) ./ image2(bw);
+
+ratiomax = max(max(image1, [], 1), [], 2);
+
+
+rgbimage = spc_im2rgb(ratio, [0, 0.5]);
+
+low = 0;
+high = immax/2;
+
+gray = (image1-low)/(high - low);
+gray(gray > 1) = 1;
+gray(gray < 0) = 0;
+rgbimage(:,:,1)=rgbimage(:,:,1).*gray;
+rgbimage(:,:,2)=rgbimage(:,:,2).*gray;
+rgbimage(:,:,3)=rgbimage(:,:,3).*gray;

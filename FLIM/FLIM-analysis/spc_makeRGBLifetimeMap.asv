@@ -1,0 +1,21 @@
+function rgbimage = spc_makeRGBLifetimeMap(spc);
+
+%Drawing
+rgbimage = spc_im2rgb(spc.lifetimeMap, spc.switches.lifetime_limit);
+try 
+    low = spc.switches.lutlim(1);
+    high = spc.switches.lutlim(2);
+catch
+    low = 0;
+    high = spc.switches.threshold;
+    spc.switches.lutlim(1) = low;
+    spc.switches.lutlim(2) = high;
+end
+gray = (spc.project-low)/(high - low);
+gray(gray > 1) = 1;
+gray(gray < 0) = 0;
+rgbimage(:,:,1)=rgbimage(:,:,1).*gray;
+rgbimage(:,:,2)=rgbimage(:,:,2).*gray;
+rgbimage(:,:,3)=rgbimage(:,:,3).*gray;
+
+%spc.rgbLifetime = rgbimage;

@@ -1,0 +1,10 @@
+function spc_set_msPerLine(val)
+
+global gh;
+
+val = round(log2(val))+1
+set(gh.advancedConfigurationGUI.msPerLine, 'Value', val)
+genericCallback(gh.advancedConfigurationGUI.msPerLine);
+setAcquisitionParameters;
+verifyEomConfig;
+applyConfigurationSettings;
