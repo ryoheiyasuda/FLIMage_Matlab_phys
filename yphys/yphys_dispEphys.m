@@ -39,7 +39,7 @@ global state
         hold off;
     end
                     
-    try
+%    try
 			set(yphys.figure.plot, 'XData', yphys.data.data(:,1), 'YData', yphys.data.data(:,2));
             if isfield(yphys, 'aveString')
                 if ~isempty(yphys.aveString) && ~isempty(yphys.aveData)
@@ -60,10 +60,10 @@ global state
                 set(yphys.figure.avePlot2, 'XData', yphys.aveData2(:,1), 'YData', yphys.aveData2(:,2), 'color', plotColor);
             end
 	
-    catch ME
-        disp('Error in yphys_getData'); 
-        fprintf(2,'ERROR in callback function (%s): \t%s\n',mfilename,ME.message);
-	end
+%     catch ME
+%         disp('Error in yphys_getData'); 
+%         fprintf(2,'ERROR in callback function (%s): \t%s\n',mfilename,ME.message);
+% 	end
 
     
 %  figure(yphys.figure.fhandle);

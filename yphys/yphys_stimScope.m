@@ -799,7 +799,7 @@ function Open_menu_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global yphys
 
-[fname,pname] = uigetfile('*.mat','Select wave');
+[fname,pname] = uigetfile('*.*','Select wave');
 cd (pname);
 filestr = [pname, fname];
 yphys_loadYphys(filestr);
@@ -844,10 +844,7 @@ if isfield(yphys, 'filename')
     try
         [pathstr,filenamestr,extstr] = fileparts(yphys.filename);
         basename = filenamestr(1:end-3);
-        num = str2double(filenamestr(end-2: end)) - 1;
-        if num < 1
-            num = 1;
-        end
+        num = str2double(filenamestr(end-2: end)) + 1;
     catch
         num = 1;
         pathstr = [state.files.savePath, 'spc'];
@@ -1179,19 +1176,20 @@ global state;
 global ysum;
 global yphys;
 
-yphys.data = [];
-yphys.aveData = [];
+if isfield(state, 'acq')
+    yphys.data = [];
+    yphys.aveData = [];
 
-%clear global yphys;
-state.yphys.acq.phys_counter = 0;
-if isfield (state, 'files')
-   spcfolder = [state.files.savePath, 'spc'];
-   if ~(exist(spcfolder) == 7)
-       mkdir(spcfolder);
-   end
+    %clear global yphys;
+    state.yphys.acq.phys_counter = 0;
+    if isfield (state, 'files')
+       spcfolder = [state.files.savePath, 'spc'];
+       if ~(exist(spcfolder) == 7)
+           mkdir(spcfolder);
+       end
+    end
+    ysum = [];
 end
-ysum = [];
-
 
 
 

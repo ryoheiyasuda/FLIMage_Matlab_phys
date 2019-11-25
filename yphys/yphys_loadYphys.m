@@ -48,7 +48,7 @@ if exist(filestr, 'file')
         yphys.filename = filestr;
         evalc(['yphys.data = ', filenamestr]);
     else
-        yphys_readFisiologyData(filenamestr);
+        yphys_readFisiologyData(filestr);
     end
     
     num = str2double(filenamestr(end-2: end));
