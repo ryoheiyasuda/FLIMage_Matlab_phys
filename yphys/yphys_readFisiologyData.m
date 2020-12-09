@@ -1,5 +1,5 @@
-function yphys_readFisiologyData(fileName)
-%fileName = 'C:\Users\yasudar\Documents\Data\AnanT\10292019\New shortcut001.txt';
+%function yphys_readFisiologyData(fileName)
+fileName = 'C:\Users\yasudar\Documents\Data\AnanT\new data\PlotData1.txt';
 global yphys
 
 yphys.filename = fileName;
@@ -10,20 +10,60 @@ currentFileN = str2double(fn(end-2:end));
 fi = dir(fileName);
 triggerTime = fi.date; %Just in case there is no triggerTime in the format....
 fid = fopen(fileName, 'r');
-y = 0;
+
+lineCount = 1;
 tline = fgetl(fid);
+tlines{1} = tline;
+while ischar(tline)
+    tline = fgetl(fid);
+    tlines{lineCount} = tline;
+    lineCount = lineCount + 1;
+end
+fclose(fid);
+
 mode = 'None';
 ch = 1;
 data = cell(1,2);
 PulseSet = '';
 
-while ischar(tline)
-    if ~isempty(tline)
+format = 'old';
+nSamples = 1;
+nChannels = 2;
+counter = 1;
+
+for y = 1 : length(tlines)
+    tline = tlines{y};
+    if ~isempty(tline) && ischar(tline)
         if strcmp(tline(end), ':')
             mode = tline(1:end-1);
-        elseif contains(tline, ',') && strcmp(mode, 'Data')
-            evalc(['data{ch} = [', tline, ']']);
-            ch = ch+1;
+        elseif strcmp(mode, 'Data')
+            if contains(tline, 'nSamples')
+                format = 'new';
+                val = strsplit(tline, '=');
+                nSamples = str2double(val{2});
+                
+            elseif contains(tline, 'nChannels')
+                format = 'new';
+                val = strsplit(tline, '=');
+                nChannels = str2double(val{2});
+                for ch = 1:nChannels
+                    data{ch} = zeros(nSamples, 1);
+                end
+            elseif contains(tline, 'Time')
+                
+            elseif contains(tline, ',')
+                if strcmp(format, 'old')
+                    evalc(['data{ch} = [', tline, ']']);
+                    ch = ch+1;
+                else
+                    val = textscan(tline, '%f,%f,%f');
+                    %evalc(['val = [', tline, ']']);
+                    for ch = 1:nChannels
+                        data{ch}(counter) = val{ch + 1};
+                    end
+                    counter = counter + 1;
+                end
+            end
         elseif strcmp(mode, 'TriggerTime')
             triggerTime = tline;
             triggerTime = strrep(triggerTime, 'T', ', '); %chagne string format to a standard one. FLIMage uses 'yyyy-mm-ddTHH:MM:SS.FFF'
@@ -45,10 +85,7 @@ while ischar(tline)
                 end
             end
         end
-    end
-    
-    tline = fgetl(fid);
-    y = y + 1;
+    end    
 end
 
 yphys.saveDirName = '';
