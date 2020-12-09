@@ -57,12 +57,17 @@ for y = 1 : length(tlines)
                     ch = ch+1;
                 else
                     val = textscan(tline, '%f,%f,%f');
-                    %evalc(['val = [', tline, ']']);
                     for ch = 1:nChannels
                         data{ch}(counter) = val{ch + 1};
                     end
                     counter = counter + 1;
                 end
+            elseif contains(tline, '\t')                
+                val = textscan(tline, '%f\t%f\t%f');
+                for ch = 1:nChannels
+                    data{ch}(counter) = val{ch + 1};
+                end
+                counter = counter + 1;
             end
         elseif strcmp(mode, 'TriggerTime')
             triggerTime = tline;
@@ -85,7 +90,7 @@ for y = 1 : length(tlines)
                 end
             end
         end
-    end    
+    end
 end
 
 yphys.saveDirName = '';
